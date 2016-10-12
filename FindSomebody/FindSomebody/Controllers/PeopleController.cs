@@ -12,17 +12,30 @@ namespace FindSomebody.Controllers
         private PersonDbContext db = new PersonDbContext();
 
         // GET: People
-        public ActionResult Index(string searchNameString)
+        public ActionResult Index(string searchName)
         {
             var people = from m in db.People
                          select m;
 
-            if (!string.IsNullOrEmpty(searchNameString))
+            if (!string.IsNullOrEmpty(searchName))
             {
-                people = people.Where(x => x.Name.Contains(searchNameString));
+                people = people.Where(x => x.Name.Contains(searchName));
+            }
+
+            if (Request.IsAjaxRequest())
+            {
+                return PartialView("_People", people);
             }
 
             return View(people);
+        }
+
+        // Get: People/Autocomplete/
+        public ActionResult Autocomplete(string term)
+        {
+            var people = db.People.Where(x => x.Name.StartsWith(term)).Take(10).Select(x => new { label = x.Name });
+
+            return Json(people, JsonRequestBehavior.AllowGet);
         }
 
         // GET: People/Details/5

@@ -77,8 +77,21 @@ namespace FindSomebody.Migrations
                   Age = 19,
                   Address = "72 Crestpoint Rd.",
                   Interests = "Design, sketching, piano"
-              }
-            );
+              });
+
+            for (int i = 0; i < 1000; ++i)
+            {
+                context.People.AddOrUpdate(
+                    p => p.Email,
+                    new Person
+                    {
+                        Name = "GenPerson: " + i.ToString(),
+                        Email = i.ToString() + "@gmail.com",
+                        Age = 99,
+                        Address = "99 Crestpoint Rd.",
+                        Interests = ""
+                    });
+            }
         }
     }
 }

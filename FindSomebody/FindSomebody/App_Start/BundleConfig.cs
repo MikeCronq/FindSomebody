@@ -1,5 +1,4 @@
-﻿using System.Web;
-using System.Web.Optimization;
+﻿using System.Web.Optimization;
 
 namespace FindSomebody
 {
@@ -8,6 +7,16 @@ namespace FindSomebody
         // For more information on bundling, visit http://go.microsoft.com/fwlink/?LinkId=301862
         public static void RegisterBundles(BundleCollection bundles)
         {
+            bundles.Add(new ScriptBundle("~/bundles/findSomebody").Include(
+                        "~/Scripts/jquery-{version}.js",
+                        "~/Scripts/jquery-ui-{version}.js",
+                        "~/Scripts/jquery.validate*",
+                        "~/Scripts/jquery.unobtrusive*",
+                        "~/Scripts/search.js"));
+
+            bundles.Add(new StyleBundle("~/Content/Aristo").Include(
+                      "~/Content/themes/Aristo/Aristo.css"));
+
             bundles.Add(new ScriptBundle("~/bundles/jquery").Include(
                         "~/Scripts/jquery-{version}.js"));
 
