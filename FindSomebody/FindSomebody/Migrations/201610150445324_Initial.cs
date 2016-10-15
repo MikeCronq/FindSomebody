@@ -12,6 +12,7 @@ namespace FindSomebody.Migrations
                 c => new
                     {
                         ID = c.Int(nullable: false, identity: true),
+                        Photo = c.String(),
                         Name = c.String(nullable: false, maxLength: 60),
                         Email = c.String(nullable: false),
                         Address = c.String(maxLength: 120),

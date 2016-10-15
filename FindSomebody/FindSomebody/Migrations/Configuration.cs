@@ -1,16 +1,17 @@
 namespace FindSomebody.Migrations
 {
     using Models;
+    using System;
     using System.Data.Entity.Migrations;
 
-    internal sealed class Configuration : DbMigrationsConfiguration<PersonDbContext>
+    internal sealed class Configuration : DbMigrationsConfiguration<PeopleDbContext>
     {
         public Configuration()
         {
             AutomaticMigrationsEnabled = false;
         }
 
-        protected override void Seed(PersonDbContext context)
+        protected override void Seed(PeopleDbContext context)
         {
             context.People.AddOrUpdate(
               p => p.Email,
@@ -79,6 +80,7 @@ namespace FindSomebody.Migrations
                   Interests = "Design, sketching, piano"
               });
 
+            var rand = new Random();
             for (int i = 0; i < 1000; ++i)
             {
                 context.People.AddOrUpdate(
@@ -87,9 +89,10 @@ namespace FindSomebody.Migrations
                     {
                         Name = "GenPerson: " + i.ToString(),
                         Email = i.ToString() + "@gmail.com",
-                        Age = 99,
-                        Address = "99 Crestpoint Rd.",
-                        Interests = ""
+                        Age = rand.Next(50) + 24,
+                        Address = (rand.Next(999) + 1) + " Crestpoint Rd.",
+                        Interests = "",
+                        Photo = "/Uploads/Photos/stock" + (rand.Next(4) + 1) + ".jpg"
                     });
             }
         }

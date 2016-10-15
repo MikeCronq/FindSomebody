@@ -8,8 +8,8 @@
 
 <form method="get" action="@Url.Action("Index")"
       data-search-ajax="true" data-search-target="#peopleTable">
-    <input type="search" name="searchName" data-search-autocomplete="@Url.Action("Autocomplete")"/>
+    <input type="search" name="searchName" data-search-autocomplete="@Url.Action("Autocomplete")" />
     <input type="submit" value="Find" />
-</form><br/>
+</form><br />
 
 @Html.Partial("_People", Model)

@@ -1,9 +1,14 @@
 ﻿@model IEnumerable<FindSomebody.Models.Person>
 
 <table id="peopleTable" class="table">
+
+    @* Table Header *@
     <tr>
         <th>
             @Html.DisplayNameFor(model => model.Name)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Photo)
         </th>
         <th>
             @Html.DisplayNameFor(model => model.Email)
@@ -17,14 +22,21 @@
         <th>
             @Html.DisplayNameFor(model => model.Interests)
         </th>
-        <th/>
+        <th />
     </tr>
 
+    @* Table Body *@
     @foreach (var item in Model)
     {
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @if (!string.IsNullOrEmpty(item.Photo))
+                {
+                    <img src="@Url.Content(item.Photo)" alt="Image" />
+                }
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Email)

@@ -4,7 +4,7 @@ using System.Data.Entity;
 namespace FindSomebody.Models
 {
     /// <summary>
-    /// Profile fields about a person.
+    /// Profile for a person.
     /// </summary>
     public class Person
     {
@@ -12,6 +12,12 @@ namespace FindSomebody.Models
         /// Unique id of the person.
         /// </summary>
         public int ID { get; set; }
+
+        /// <summary>
+        /// Url for the persons picture.
+        /// </summary>
+        [DataType(DataType.ImageUrl)]
+        public string Photo { get; set; }
 
         /// <summary>
         /// Name of the person.
@@ -43,14 +49,12 @@ namespace FindSomebody.Models
         /// Intersts and hobbies a person has.
         /// </summary>
         public string Interests { get; set; }
-
-        //Missing Picture!
     }
 
     /// <summary>
     /// Entity Framework person database context.
     /// </summary>
-    public class PersonDbContext : DbContext
+    public class PeopleDbContext : DbContext
     {
         /// <summary>
         /// A database set of persons.

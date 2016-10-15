@@ -1,15 +1,20 @@
 ﻿using FindSomebody.Models;
+using FindSomebody.ViewModels;
 using System.Data;
 using System.Data.Entity;
+using System.IO;
 using System.Linq;
 using System.Net;
+using System.Web;
 using System.Web.Mvc;
 
 namespace FindSomebody.Controllers
 {
     public class PeopleController : Controller
     {
-        private PersonDbContext db = new PersonDbContext();
+        private string photoPath = "/Uploads/Photos/";
+
+        private PeopleDbContext db = new PeopleDbContext();
 
         // GET: People
         public ActionResult Index(string searchName)
@@ -64,16 +69,46 @@ namespace FindSomebody.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "ID,Email,Name,Address,Age,Interests")] Person person)
+        public ActionResult Create([Bind(Include = "Person,PhotoUpload")] EditPersonViewModel viewModel)
         {
+            CheckValidImageType(viewModel.PhotoUpload);
             if (ModelState.IsValid)
             {
-                db.People.Add(person);
+                UploadPhoto(viewModel);
+                db.People.Add(viewModel.EditPerson);
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
 
-            return View(person);
+            return View(viewModel);
+        }
+
+        /// <summary>
+        /// Adds a model state error if the file is not an image type.
+        /// </summary>
+        /// <param name="fileUpload">Image upload to check.</param>
+        private void CheckValidImageType(HttpPostedFileBase fileUpload)
+        {
+            var validTypes = new[] { "image/jpeg", "image/pjpeg", "image/png", "image/gif" };
+            if (!validTypes.Contains(fileUpload.ContentType))
+            {
+                ModelState.AddModelError("PhotoUpload", "Please upload either a JPG, GIF, or PNG image.");
+            }
+        }
+
+        /// <summary>
+        /// Upload the file if it is valid
+        /// </summary>
+        /// <param name="model"></param>
+        private void UploadPhoto(EditPersonViewModel model)
+        {
+            if (model.PhotoUpload.ContentLength > 0)
+            {
+                var fileName = Path.GetFileName(model.PhotoUpload.FileName);
+                var path = Path.Combine(Server.MapPath(photoPath), fileName);
+                model.PhotoUpload.SaveAs(path);
+                model.EditPerson.Photo = photoPath + fileName;
+            }
         }
 
         // GET: People/Edit/5
@@ -88,7 +123,7 @@ namespace FindSomebody.Controllers
             {
                 return HttpNotFound();
             }
-            return View(person);
+            return View(new EditPersonViewModel() { EditPerson = person });
         }
 
         // POST: People/Edit/5
@@ -96,15 +131,17 @@ namespace FindSomebody.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "ID,Email,Name,Address,Age,Interests")] Person person)
+        public ActionResult Edit([Bind(Include = "EditPerson,PhotoUpload")] EditPersonViewModel model)
         {
+            CheckValidImageType(model.PhotoUpload);
             if (ModelState.IsValid)
             {
-                db.Entry(person).State = EntityState.Modified;
+                UploadPhoto(model);
+                db.Entry(model.EditPerson).State = EntityState.Modified;
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
-            return View(person);
+            return View(model);
         }
 
         // GET: People/Delete/5
