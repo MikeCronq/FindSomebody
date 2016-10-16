@@ -16,7 +16,7 @@ namespace FindSomebody.Migrations
                         Name = c.String(nullable: false, maxLength: 60),
                         Email = c.String(nullable: false),
                         Address = c.String(maxLength: 120),
-                        Age = c.Int(nullable: false),
+                        Age = c.Int(),
                         Interests = c.String(),
                     })
                 .PrimaryKey(t => t.ID);

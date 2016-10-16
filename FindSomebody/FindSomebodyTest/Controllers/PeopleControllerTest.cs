@@ -4,6 +4,7 @@ using FindSomebodyTest;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Net;
 using System.Web.Mvc;
@@ -16,6 +17,7 @@ namespace FindSomebody.Controllers.Tests
         private PeopleController _controller;
         private Person[] _people;
 
+        private Mock<DbSet<Person>> _dbSetMock;
         private Mock<PeopleDbContext> _dbMock;
         private ContextMocks _contextMocks;
 
@@ -37,11 +39,11 @@ namespace FindSomebody.Controllers.Tests
                 };
             }
 
-            var mockDbSet = EntityFrameworkMockFactory.CreateMockDbSet(_people.AsQueryable());
-            mockDbSet.Setup(x => x.Find(It.IsAny<object[]>())).Returns<object[]>(ids => _people.FirstOrDefault(x => x.ID == (int)ids[0]));
+            _dbSetMock = EntityFrameworkMockFactory.CreateMockDbSet(_people.AsQueryable());
+            _dbSetMock.Setup(x => x.Find(It.IsAny<object[]>())).Returns<object[]>(ids => _people.FirstOrDefault(x => x.ID == (int)ids[0]));
 
             _dbMock = new Mock<PeopleDbContext>();
-            _dbMock.Setup(x => x.People).Returns(mockDbSet.Object);
+            _dbMock.Setup(x => x.People).Returns(_dbSetMock.Object);
 
             _controller = new PeopleController(_dbMock.Object);
 
@@ -64,7 +66,7 @@ namespace FindSomebody.Controllers.Tests
         [TestMethod()]
         public void IndexAjaxSearchTest()
         {
-            //IsAjaxRequest == false;
+            //IsAjaxRequest == true;
             _contextMocks.RequestMock.Setup(x => x.Headers).Returns(new WebHeaderCollection() {
                 {"X-Requested-With", "XMLHttpRequest"}
             });
@@ -93,12 +95,19 @@ namespace FindSomebody.Controllers.Tests
         [TestMethod()]
         public void CreateTest()
         {
+            var name = "validateName";
+
             var viewModel = new EditPersonViewModel();
+            viewModel.EditPerson.Name = name;
+
+            _dbSetMock.Setup(x => x.Add(viewModel.EditPerson)).Returns(viewModel.EditPerson).Verifiable();
 
             var result = _controller.Create(viewModel) as RedirectToRouteResult;
 
             Assert.IsNotNull(result);
             Assert.AreEqual("Index", result.RouteValues["action"]);
+
+            _dbSetMock.Verify();
         }
 
         [TestMethod()]
@@ -118,13 +127,17 @@ namespace FindSomebody.Controllers.Tests
         [TestMethod()]
         public void DeleteTest()
         {
-            _controller.Delete(1);
+            var result = _controller.Delete(1) as ViewResult;
+            var person = (Person)result.ViewData.Model;
+            Assert.AreEqual(_people[1], person);
         }
 
         [TestMethod()]
         public void DeleteConfirmedTest()
         {
-            Assert.Fail();
+            var result = _controller.DeleteConfirmed(1) as RedirectToRouteResult;
+
+            Assert.AreEqual("Index", result.RouteValues["action"]);
         }
     }
 }

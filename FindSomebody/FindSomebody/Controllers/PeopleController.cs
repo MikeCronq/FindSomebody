@@ -1,9 +1,11 @@
 ﻿using FindSomebody.Models;
 using FindSomebody.ViewModels;
+using System;
 using System.Data;
 using System.Data.Entity;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Web;
 using System.Web.Mvc;
 using WebTools;
@@ -25,11 +27,18 @@ namespace FindSomebody.Controllers
         /// </summary>
         private PeopleDbContext _db = new PeopleDbContext();
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public PeopleController()
         {
             _db = new PeopleDbContext();
         }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="db">Person database</param>
         public PeopleController(PeopleDbContext db)
         {
             _db = db;
@@ -46,8 +55,11 @@ namespace FindSomebody.Controllers
                 people = people.Where(x => x.Name.Contains(searchName));
             }
 
+            people = people.OrderBy(x => x.Name);
+
             if (Request.IsAjaxRequest())
             {
+                Thread.Sleep(Math.Min(2000, 50 * people.Count()));
                 return PartialView("_People", people);
             }
 
@@ -57,7 +69,7 @@ namespace FindSomebody.Controllers
         // Get: People/Autocomplete/
         public ActionResult Autocomplete(string term)
         {
-            var people = _db.People.Where(x => x.Name.StartsWith(term)).Take(10).Select(x => new { label = x.Name });
+            var people = _db.People.Where(x => x.Name.Contains(term)).Take(10).Select(x => x.Name);
 
             return Json(people, JsonRequestBehavior.AllowGet);
         }
@@ -80,7 +92,7 @@ namespace FindSomebody.Controllers
         // GET: People/Create
         public ActionResult Create()
         {
-            return View();
+            return View(new EditPersonViewModel());
         }
 
         // POST: People/Create
@@ -88,12 +100,12 @@ namespace FindSomebody.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Person,PhotoUpload")] EditPersonViewModel model)
+        public ActionResult Create([Bind(Include = "EditPerson,PhotoUpload")] EditPersonViewModel model)
         {
             ValidatePhoto(model.PhotoUpload);
             if (ModelState.IsValid)
             {
-                model.EditPerson.Photo = Files.UploadFile(Server, _photoPath, model.PhotoUpload);
+                UploadPhoto(model);
                 _db.People.Add(model.EditPerson);
                 _db.SaveChanges();
                 return RedirectToAction("Index");
@@ -114,7 +126,8 @@ namespace FindSomebody.Controllers
             {
                 return HttpNotFound();
             }
-            return View(new EditPersonViewModel() { EditPerson = person });
+            var edit = new EditPersonViewModel() { EditPerson = person };
+            return View(edit);
         }
 
         // POST: People/Edit/5
@@ -127,7 +140,7 @@ namespace FindSomebody.Controllers
             ValidatePhoto(model.PhotoUpload);
             if (ModelState.IsValid)
             {
-                model.EditPerson.Photo = Files.UploadFile(Server, _photoPath, model.PhotoUpload);
+                UploadPhoto(model);
                 _db.SetModified(model.EditPerson);
                 _db.SaveChanges();
                 return RedirectToAction("Index");
@@ -183,6 +196,19 @@ namespace FindSomebody.Controllers
             if (fileUpload != null && !FileConstants.DefaultImageTypes.Contains(fileUpload.ContentType))
             {
                 ModelState.AddModelError("PhotoUpload", FileConstants.InvalidImageTypeError);
+            }
+        }
+
+        /// <summary>
+        /// Uploads and sets path for a photo.
+        /// </summary>
+        /// <param name="model">Edit person view model with photo upload.</param>
+        private void UploadPhoto(EditPersonViewModel model)
+        {
+            var newPhoto = Files.UploadFile(Server, _photoPath, model.PhotoUpload);
+            if (!string.IsNullOrEmpty(newPhoto))
+            {
+                model.EditPerson.Photo = newPhoto;
             }
         }
     }

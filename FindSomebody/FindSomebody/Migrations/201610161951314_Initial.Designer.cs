@@ -13,7 +13,7 @@ namespace FindSomebody.Migrations
         
         string IMigrationMetadata.Id
         {
-            get { return "201610150445324_Initial"; }
+            get { return "201610161951314_Initial"; }
         }
         
         string IMigrationMetadata.Source

@@ -18,7 +18,7 @@ namespace WebTools
                 folderPath += '/';
             }
 
-            var fileUrl = string.Empty;
+            string fileUrl = null;
             if (fileUpload != null)
             {
                 if (fileUpload.ContentLength > 0)

@@ -198,9 +198,9 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201610150445324_Initial.cs" />
-    <Compile Include="Migrations\201610150445324_Initial.Designer.cs">
-      <DependentUpon>201610150445324_Initial.cs</DependentUpon>
+    <Compile Include="Migrations\201610161951314_Initial.cs" />
+    <Compile Include="Migrations\201610161951314_Initial.Designer.cs">
+      <DependentUpon>201610161951314_Initial.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Person.cs" />
@@ -327,15 +327,15 @@
     <Content Include="Scripts\jquery-3.1.1.min.map" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\201610150445324_Initial.resx">
-      <DependentUpon>201610150445324_Initial.cs</DependentUpon>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\WebFiles\WebTools.csproj">
       <Project>{d913d4de-3f52-4ea7-982a-65635938bb1d}</Project>
       <Name>WebTools</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\201610161951314_Initial.resx">
+      <DependentUpon>201610161951314_Initial.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

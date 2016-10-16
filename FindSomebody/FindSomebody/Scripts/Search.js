@@ -1,6 +1,9 @@
 ﻿$(function () {
     var ajaxSearchSubmit = function () {
         var $form = $(this);
+        var $target = $($form.attr("data-search-target"));
+
+        $target.css("opacity", 0.5);
 
         var options = {
             url: $form.attr("action"),
@@ -9,7 +12,6 @@
         };
 
         $.ajax(options).done(function (data) {
-            var $target = $($form.attr("data-search-target"));
             $target.replaceWith(data);
         });
 
@@ -23,9 +25,8 @@
         var $form = $input.parents("form:first");
         $form.submit();
 
-        this.blur(); 
+        this.blur();
     };
-
 
     var createAutocomplete = function () {
         var $input = $(this);
@@ -44,7 +45,13 @@
         $input.autocomplete(options).keyup(onEnterClose);
     };
 
-
     $("form[data-search-ajax='true']").submit(ajaxSearchSubmit);
     $("input[data-search-autocomplete]").each(createAutocomplete);
+
+    window.onpopstate = function (e) {
+        if (e.state) {
+            document.getElementById("content").innerHTML = e.state.html;
+            document.title = e.state.pageTitle;
+        }
+    };
 });

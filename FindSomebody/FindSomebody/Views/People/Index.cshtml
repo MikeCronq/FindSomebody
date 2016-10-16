@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<FindSomebody.Models.Person>
 
 @{
-    ViewBag.Title = "Find Somebody";
+    ViewBag.Title = "Search";
 }
 
 <h2>People</h2>
@@ -12,4 +12,9 @@
     <input type="submit" value="Find" />
 </form><br />
 
-@Html.Partial("_People", Model)
+<form>
+    <asp:formview emptydatatext="hooplah">
+
+        @Html.Partial("_People", Model)
+    </asp:formview>
+</form>

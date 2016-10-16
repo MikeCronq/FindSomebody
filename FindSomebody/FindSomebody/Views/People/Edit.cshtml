@@ -13,6 +13,7 @@
     <div class="form-horizontal">
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
         @Html.HiddenFor(model => model.EditPerson.ID)
+        @Html.HiddenFor(model => model.EditPerson.Photo)
 
         <div class="form-group">
             @Html.LabelFor(model => model.EditPerson.Name, htmlAttributes: new { @class = "control-label col-md-2" })
@@ -62,6 +63,7 @@
                     <img src="@Url.Content(Model.EditPerson.Photo)" alt="Image" />
                 }
                 @Html.TextBoxFor(model => model.PhotoUpload, new { type = "file" })
+                @Html.ValidationMessageFor(model => model.PhotoUpload, "", new { @class = "text-danger" })
             </div>
         </div>
 

@@ -101,6 +101,8 @@ namespace FindSomebody.Migrations
             var photoDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\Uploads\Photos");
             var photos = Directory.EnumerateFiles(photoDirectory).Select(x => x.Substring(x.LastIndexOf('\\') + 1)).ToArray();
 
+            var middleInitial = Enumerable.Range('A', 26).Select(i => (char)i).ToArray();
+
             var rand = new Random();
             for (int i = 0; i < 1000; ++i)
             {
@@ -108,7 +110,7 @@ namespace FindSomebody.Migrations
                     p => p.Email,
                     new Person
                     {
-                        Name = firstNameSet[rand.Next(firstNameSet.Length)] + " " + lastNameSet[rand.Next(lastNameSet.Length)],
+                        Name = firstNameSet[rand.Next(firstNameSet.Length)] + " " + middleInitial[rand.Next(middleInitial.Length)] + " " + lastNameSet[rand.Next(lastNameSet.Length)],
                         Email = i.ToString() + "@website.com",
                         Age = rand.Next(60) + 24,
                         Address = (rand.Next(999) + 1) + " " + addressStreetName[rand.Next(addressStreetName.Length)] + " " + addressPostfix[rand.Next(addressPostfix.Length)],

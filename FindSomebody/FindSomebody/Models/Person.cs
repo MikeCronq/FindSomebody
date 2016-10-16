@@ -43,7 +43,7 @@ namespace FindSomebody.Models
         /// <summary>
         /// Age of the person.
         /// </summary>
-        public int Age { get; set; }
+        public int? Age { get; set; }
 
         /// <summary>
         /// Intersts and hobbies a person has.
