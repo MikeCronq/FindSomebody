@@ -9,11 +9,20 @@ namespace FindSomebody.ViewModels
     /// </summary>
     public class EditPersonViewModel
     {
+        /// <summary>
+        /// Person to create or edit.
+        /// </summary>
         public Person EditPerson { get; set; }
 
+        /// <summary>
+        /// File upload.
+        /// </summary>
         [Display(Name = "Upload Photo")]
         public HttpPostedFileBase PhotoUpload { get; set; }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public EditPersonViewModel()
         {
             EditPerson = new Person();

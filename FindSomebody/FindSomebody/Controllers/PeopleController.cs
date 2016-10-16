@@ -2,24 +2,43 @@
 using FindSomebody.ViewModels;
 using System.Data;
 using System.Data.Entity;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
+using WebTools;
 
 namespace FindSomebody.Controllers
 {
+    /// <summary>
+    /// Controller for people, enabling CRUD and search functionality.
+    /// </summary>
     public class PeopleController : Controller
     {
-        private string photoPath = "/Uploads/Photos/";
+        /// <summary>
+        /// Local file path to profile photos.
+        /// </summary>
+        private string _photoPath = "/Uploads/Photos/";
 
-        private PeopleDbContext db = new PeopleDbContext();
+        /// <summary>
+        /// People database context.
+        /// </summary>
+        private PeopleDbContext _db = new PeopleDbContext();
+
+        public PeopleController()
+        {
+            _db = new PeopleDbContext();
+        }
+
+        public PeopleController(PeopleDbContext db)
+        {
+            _db = db;
+        }
 
         // GET: People
         public ActionResult Index(string searchName)
         {
-            var people = from m in db.People
+            var people = from m in _db.People
                          select m;
 
             if (!string.IsNullOrEmpty(searchName))
@@ -38,7 +57,7 @@ namespace FindSomebody.Controllers
         // Get: People/Autocomplete/
         public ActionResult Autocomplete(string term)
         {
-            var people = db.People.Where(x => x.Name.StartsWith(term)).Take(10).Select(x => new { label = x.Name });
+            var people = _db.People.Where(x => x.Name.StartsWith(term)).Take(10).Select(x => new { label = x.Name });
 
             return Json(people, JsonRequestBehavior.AllowGet);
         }
@@ -50,7 +69,7 @@ namespace FindSomebody.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Person person = db.People.Find(id);
+            Person person = _db.People.Find(id);
             if (person == null)
             {
                 return HttpNotFound();
@@ -69,46 +88,18 @@ namespace FindSomebody.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Person,PhotoUpload")] EditPersonViewModel viewModel)
+        public ActionResult Create([Bind(Include = "Person,PhotoUpload")] EditPersonViewModel model)
         {
-            CheckValidImageType(viewModel.PhotoUpload);
+            ValidatePhoto(model.PhotoUpload);
             if (ModelState.IsValid)
             {
-                UploadPhoto(viewModel);
-                db.People.Add(viewModel.EditPerson);
-                db.SaveChanges();
+                model.EditPerson.Photo = Files.UploadFile(Server, _photoPath, model.PhotoUpload);
+                _db.People.Add(model.EditPerson);
+                _db.SaveChanges();
                 return RedirectToAction("Index");
             }
 
-            return View(viewModel);
-        }
-
-        /// <summary>
-        /// Adds a model state error if the file is not an image type.
-        /// </summary>
-        /// <param name="fileUpload">Image upload to check.</param>
-        private void CheckValidImageType(HttpPostedFileBase fileUpload)
-        {
-            var validTypes = new[] { "image/jpeg", "image/pjpeg", "image/png", "image/gif" };
-            if (!validTypes.Contains(fileUpload.ContentType))
-            {
-                ModelState.AddModelError("PhotoUpload", "Please upload either a JPG, GIF, or PNG image.");
-            }
-        }
-
-        /// <summary>
-        /// Upload the file if it is valid
-        /// </summary>
-        /// <param name="model"></param>
-        private void UploadPhoto(EditPersonViewModel model)
-        {
-            if (model.PhotoUpload.ContentLength > 0)
-            {
-                var fileName = Path.GetFileName(model.PhotoUpload.FileName);
-                var path = Path.Combine(Server.MapPath(photoPath), fileName);
-                model.PhotoUpload.SaveAs(path);
-                model.EditPerson.Photo = photoPath + fileName;
-            }
+            return View(model);
         }
 
         // GET: People/Edit/5
@@ -118,7 +109,7 @@ namespace FindSomebody.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Person person = db.People.Find(id);
+            Person person = _db.People.Find(id);
             if (person == null)
             {
                 return HttpNotFound();
@@ -133,12 +124,12 @@ namespace FindSomebody.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include = "EditPerson,PhotoUpload")] EditPersonViewModel model)
         {
-            CheckValidImageType(model.PhotoUpload);
+            ValidatePhoto(model.PhotoUpload);
             if (ModelState.IsValid)
             {
-                UploadPhoto(model);
-                db.Entry(model.EditPerson).State = EntityState.Modified;
-                db.SaveChanges();
+                model.EditPerson.Photo = Files.UploadFile(Server, _photoPath, model.PhotoUpload);
+                _db.SetModified(model.EditPerson);
+                _db.SaveChanges();
                 return RedirectToAction("Index");
             }
             return View(model);
@@ -151,7 +142,7 @@ namespace FindSomebody.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Person person = db.People.Find(id);
+            Person person = _db.People.Find(id);
             if (person == null)
             {
                 return HttpNotFound();
@@ -164,19 +155,35 @@ namespace FindSomebody.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            Person person = db.People.Find(id);
-            db.People.Remove(person);
-            db.SaveChanges();
+            Person person = _db.People.Find(id);
+            _db.People.Remove(person);
+            _db.SaveChanges();
             return RedirectToAction("Index");
         }
 
+        /// <summary>
+        /// Cleanup class on disposal.
+        /// </summary>
+        /// <param name="disposing">Is the class being displosed</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
-                db.Dispose();
+                _db.Dispose();
             }
             base.Dispose(disposing);
+        }
+
+        /// <summary>
+        /// Sets a validation error if a file upload is not an image.
+        /// </summary>
+        /// <param name="fileUpload">Photo file upload.</param>
+        private void ValidatePhoto(HttpPostedFileBase fileUpload)
+        {
+            if (fileUpload != null && !FileConstants.DefaultImageTypes.Contains(fileUpload.ContentType))
+            {
+                ModelState.AddModelError("PhotoUpload", FileConstants.InvalidImageTypeError);
+            }
         }
     }
 }

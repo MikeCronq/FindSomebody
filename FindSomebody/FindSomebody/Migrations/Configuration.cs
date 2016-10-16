@@ -3,14 +3,26 @@ namespace FindSomebody.Migrations
     using Models;
     using System;
     using System.Data.Entity.Migrations;
+    using System.IO;
+    using System.Linq;
 
+    /// <summary>
+    /// People database configuration.
+    /// </summary>
     internal sealed class Configuration : DbMigrationsConfiguration<PeopleDbContext>
     {
+        /// <summary>
+        /// Configuration settings.
+        /// </summary>
         public Configuration()
         {
             AutomaticMigrationsEnabled = false;
         }
 
+        /// <summary>
+        /// Seed a couple fake profiles, and a large group of randomly generated profiles.
+        /// </summary>
+        /// <param name="context"></param>
         protected override void Seed(PeopleDbContext context)
         {
             context.People.AddOrUpdate(
@@ -80,6 +92,15 @@ namespace FindSomebody.Migrations
                   Interests = "Design, sketching, piano"
               });
 
+            var firstNameSet = new[] { "Melissa", "Frank", "David", "Jesse", "Jacob", "Tyler", "Jason", "Amber", "Tobe", "Daniel", "Megan", "Summer" };
+            var lastNameSet = new[] { "Smith", "Johnson", "Williams", "Jones", "Brown", "Miller", "White", "Jackson", "Lewis", "Lee", "Hall", "Allen" };
+            var addressStreetName = new[] { "Waterson", "Main", "Trail", "MLK", "Riverwood", "Ironside", "Mountain", "Olympic" };
+            var addressPostfix = new[] { "Ave.", "Dr.", "St.", "Blvd.", "Rd.", "Ln." };
+            var interestSet = new[] { "Cars", "Videogames", "Sailling", "Base jumping", "Movies", "Mountain Biking", "Scuba", "Reading" };
+
+            var photoDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\Uploads\Photos");
+            var photos = Directory.EnumerateFiles(photoDirectory).Select(x => x.Substring(x.LastIndexOf('\\') + 1)).ToArray();
+
             var rand = new Random();
             for (int i = 0; i < 1000; ++i)
             {
@@ -87,12 +108,12 @@ namespace FindSomebody.Migrations
                     p => p.Email,
                     new Person
                     {
-                        Name = "GenPerson: " + i.ToString(),
-                        Email = i.ToString() + "@gmail.com",
-                        Age = rand.Next(50) + 24,
-                        Address = (rand.Next(999) + 1) + " Crestpoint Rd.",
-                        Interests = "",
-                        Photo = "/Uploads/Photos/stock" + (rand.Next(4) + 1) + ".jpg"
+                        Name = firstNameSet[rand.Next(firstNameSet.Length)] + " " + lastNameSet[rand.Next(lastNameSet.Length)],
+                        Email = i.ToString() + "@website.com",
+                        Age = rand.Next(60) + 24,
+                        Address = (rand.Next(999) + 1) + " " + addressStreetName[rand.Next(addressStreetName.Length)] + " " + addressPostfix[rand.Next(addressPostfix.Length)],
+                        Interests = interestSet[rand.Next(interestSet.Length)] + ", " + interestSet[rand.Next(interestSet.Length)] + ", " + interestSet[rand.Next(interestSet.Length)],
+                        Photo = "/Uploads/Photos/" + photos[rand.Next(photos.Length)]
                     });
             }
         }

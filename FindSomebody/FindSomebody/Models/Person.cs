@@ -59,6 +59,15 @@ namespace FindSomebody.Models
         /// <summary>
         /// A database set of persons.
         /// </summary>
-        public DbSet<Person> People { get; set; }
+        public virtual IDbSet<Person> People { get; set; }
+
+        /// <summary>
+        /// Mockable access to Entry.
+        /// </summary>
+        /// <param name="entity"></param>
+        public virtual void SetModified(object entity)
+        {
+            Entry(entity).State = EntityState.Modified;
+        }
     }
 }

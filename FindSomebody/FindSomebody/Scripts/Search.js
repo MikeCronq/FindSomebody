@@ -22,7 +22,10 @@
 
         var $form = $input.parents("form:first");
         $form.submit();
+
+        this.blur(); 
     };
+
 
     var createAutocomplete = function () {
         var $input = $(this);
@@ -32,8 +35,15 @@
             select: submitAutocompleteForm
         };
 
-        $input.autocomplete(options);
+        var onEnterClose = function (event) {
+            if (event.which === 13) {
+                this.blur();
+            }
+        };
+
+        $input.autocomplete(options).keyup(onEnterClose);
     };
+
 
     $("form[data-search-ajax='true']").submit(ajaxSearchSubmit);
     $("input[data-search-autocomplete]").each(createAutocomplete);
