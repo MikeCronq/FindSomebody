@@ -45,6 +45,11 @@ namespace FindSomebody.Controllers
         }
 
         // GET: People
+        /// <summary>
+        /// Display root for People page. Shows a list of
+        /// </summary>
+        /// <param name="searchName"></param>
+        /// <returns></returns>
         public ActionResult Index(string searchName)
         {
             var people = from m in _db.People
